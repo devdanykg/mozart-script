@@ -1,12 +1,15 @@
 local lastApp = nil
 local webview = nil
+local escHotkey = nil
 
 local emojis = {
-    "✌️", "❤️", "?", "‍♀", "‍♂", "✔️", "✨", "☺️", "☹️", "☠️", "⛷","⚕", "⚖️", "✈️", "⛹️", "‍♀️", "‍♂️", "☝️", "⭕️", "✋", "✊", "✍️", "⛑", "⚽️", "⚾️", "⛳️", "⛸", "♟", "♠️", "♣️", "♥️", "♦️", "⛏️", "⚒️", "⚙️", "⚗️", "⚖️", "⛓️", "⚔️", "☎️", "⚰️", "⚱️", "⌨️", "✉️", "✏️", "✒️", "✂️", "⏳", "⏰", "⌚️", "⏱️", "⏲️", "☕️", "☘️", "⛵️", "⛴", "⚓️", "⛽️", "☠️", "⛰", "⛪️", "⛩", "⛲️", "⛺️", "♨️", "☁️", "⛅️", "⛈", "☀️", "⭐️", "☄️", "☂️", "☔️", "⛱", "⚡️", "❄️", "⚛️", "☸️", "☃️", "⛄️", "❣️", "☮️", "✝️", "☪️", "☸️", "✡️", "☯️", "☦️", "⛎", "♈️", "♉️", "♊️", "♋️", "♌️", "♍️", "♎️", "♏️", "♐️", "♑️", "♒️", "♓️", "⚕", "♾️", "⚛️", "✴️", "㊙️", "㊗️", "❗️", "❕", "❓", "❔", "⁉️", "⚜️", "〽️", "☢️", "☣️", "⚠️", "♻️", "❇️", "✳️", "❎", "✅", "Ⓜ️", "➿", "♿️", "#", "⃣", "*", "0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "▶️", "⏸️", "⏯️", "⏹️", "⏺️", "⏭️", "⏮️", "⏩", "⏪", "◀️", "⏫", "⏬", "⏏️", "➡️", "⬅️", "⬆️", "⬇️", "↗️", "↘️", "↙️", "↖️", "↕️", "↔️", "↪️", "↩️", "⤴️", "⤵️", "ℹ️", "☑️", "〰️", "➰", "➕", "➖", "✖️", "➗", "©", "®", "™", "⚫️", "⚪️", "⬛️", "⬜️", "◼️", "◻️", "◾️", "◽️", "❌", "⏩", "⏬", "⏫", "⏳", "⛔️"
+    "✌️", "❤️", "?", "‍♀", "‍♂", "✔️", "✨", "☺️", "☹️", "☠️", "⛷","⚕", "⚖️", "✈️", "⛹️", "‍♀️", "‍♂️", "☝️", "⭕️", "✋", "✊", "✍️", "⛑", "⚽️", "⚾️", "⛳️", "⛸", "♟", "♠️", "♣️", "♥️", "♦️", "⛏️", "⚒️", "⚙️", "⚗️", "⛓️", "⚔️", "☎️", "⚰️", "⚱️", "⌨️", "✉️", "✏️", "✒️", "✂️", "⏳", "⏰", "⌚️", "⏱️", "⏲️", "☕️", "☘️", "⛵️", "⛴", "⚓️", "⛽️", "⛰", "⛪️", "⛩", "⛲️", "⛺️", "♨️", "☁️", "⛅️", "⛈", "☀️", "⭐️", "☄️", "☂️", "☔️", "⛱", "⚡️", "❄️", "⚛️", "☸️", "☃️", "⛄️", "❣️", "☮️", "✝️", "☪️", "✡️", "☯️", "☦️", "⛎", "♈️", "♉️", "♊️", "♋️", "♌️", "♍️", "♎️", "♏️", "♐️", "♑️", "♒️", "♓️", "♾️", "✴️", "㊙️", "㊗️", "❗️", "❕", "❓", "❔", "⁉️", "⚜️", "〽️", "☢️", "☣️", "⚠️", "♻️", "❇️", "✳️", "❎", "✅", "Ⓜ️", "➿", "♿️", "#", "⃣", "*", "0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "▶️", "⏸️", "⏯️", "⏹️", "⏺️", "⏭️", "⏮️", "⏩", "⏪", "◀️", "⏫", "⏬", "⏏️", "➡️", "⬅️", "⬆️", "⬇️", "↗️", "↘️", "↙️", "↖️", "↕️", "↔️", "↪️", "↩️", "⤴️", "⤵️", "ℹ️", "☑️", "〰️", "➰", "➕", "➖", "✖️", "➗", "©", "®", "™", "⚫️", "⚪️", "⬛️", "⬜️", "◼️", "◻️", "◾️", "◽️", "❌", "⏬", "⏫", "⏳", "⛔️"
 }
 
-local function generateHTML(groups)
-    local html = [[
+local function generateHTML()
+    local parts = {}
+
+    table.insert(parts, [[
     <html>
     <head>
     <meta charset="utf-8">
@@ -40,33 +43,31 @@ local function generateHTML(groups)
     </style>
     </head>
     <body>
-    ]]
+    <div class="grid">
+    ]])
 
-    html = html .. '<div class="grid">'
-    
     for _, e in ipairs(emojis) do
-        html = html .. '<div class="emoji" onclick="send(\'' .. e .. '\')">' .. e .. '</div>'
+        table.insert(parts,
+            '<div class="emoji" onclick="send(\'' .. e .. '\')">' .. e .. '</div>'
+        )
     end
 
-    html = html .. '</div>'
-
-    html = html .. [[
-        <script>
-            function send(e) {
-                window.location.href = "hammerspoon://emoji?e=" + encodeURIComponent(e);
-            }
-        </script>
+    table.insert(parts, [[
+    </div>
+    <script>
+        function send(e) {
+            window.location.href = "hammerspoon://emoji?e=" + encodeURIComponent(e);
+        }
+    </script>
     </body></html>
-    ]]
+    ]])
 
-    return html
+    return table.concat(parts)
 end
 
 local function insertEmoji(emoji)
     if not lastApp then return end
-
     lastApp:activate()
-
     hs.timer.doAfter(0.1, function()
         hs.eventtap.keyStrokes(emoji)
     end)
@@ -77,21 +78,116 @@ hs.urlevent.bind("emoji", function(eventName, params)
     if emoji then
         webview:hide()
         insertEmoji(emoji)
+	if escHotkey then escHotkey:disable() end
     end
 end)
 
-webview = hs.webview.new({x=500,y=300,w=340,h=300})
-    :windowStyle({"nonactivating", "borderless"})
-    :shadow(true)
-    :level(hs.drawing.windowLevels.popUpMenu)
-    :html(generateHTML(groups))
-    :transparent(true)
+if not webview then
+     webview = hs.webview.new({x=500,y=300,w=340,h=300})
+    	:windowStyle({"nonactivating", "borderless"})
+    	:level(hs.drawing.windowLevels.popUpMenu)
+    	:html(generateHTML())
+    	:transparent(true)
+end
 
 hs.hotkey.bind({"cmd"}, "Y", function()
     lastApp = hs.application.frontmostApplication()
     local mousePos = hs.mouse.absolutePosition()
     webview:topLeft(mousePos)
     webview:show()
+    if escHotkey then escHotkey:enable() end
 end)
 
-print("MoZZart script loaded.")
+print("MoZZart & devdany script loaded.")
+hs.alert("MoZZart & devdany script loaded.")
+
+local function getConfigPath()
+    local home = os.getenv("HOME")
+    return home .. "/.hammerspoon"
+end
+
+function checkForUpdates()
+    local localVersion = getLocalVersion()
+    local http = require "hs.http"
+    local ok, response = http.get("https://raw.githubusercontent.com/devdanykg/mozart-script/main/version.txt")
+    if ok then
+        local remoteVersion = response
+        if remoteVersion ~= localVersion then
+            hs.dialog.alert(nil, nil, performUpdate,"MoZZart & devdany Script Update", "Update is available\nCurrent version:  " .. localVersion .. "\nNew version: " .. remoteVersion, "Update", "Later", "NSCriticalAlertStyle")
+        else
+            hs.alert("No update required")
+        end
+    else
+        hs.alert("Unable to check update")
+    end
+end
+
+function getLocalVersion()
+    local configPath = getConfigPath()
+    local file = io.open(configPath .. "/version.txt", "r")
+    if file then
+        local content = file:read("*all")
+        file:close()
+        return content
+    else
+	return "0.0.0"
+    end
+    return ""
+end
+
+function downloadFile(url, path)
+    local tempPath = path .. ".tmp"
+    local file, err = io.open(tempPath, "wb")
+    if not file then
+        return false, "Unable to create temp file"
+    end
+    local status, body = hs.http.get(url)
+    if status ~= 200 and not body or body == "" then
+        file:close()
+        os.remove(tempPath)
+        return false, "Response empty"
+    end
+    file:write(body)
+    file:close()
+    local fileTemp = io.open(tempPath)
+    local fileSize = fileTemp:seek("end")
+    fileTemp.close() 
+    if fileSize == 0 then
+        os.remove(tempPath)
+        return false, "File is empty"
+    end
+    local success = os.rename(tempPath, path)
+    if not success then
+        return false, "Error file rename"
+    end
+    return true
+end
+
+function performUpdate(result)
+    if result == "Update" then 
+    	local configPath = getConfigPath()
+    	local success, err = pcall(function()
+        	local initSuccess, initErr = downloadFile("https://raw.githubusercontent.com/devdanykg/mozart-script/main/init.lua", configPath .. "/init.lua")
+        	if not initSuccess then
+            		return false, initErr
+        	end
+        	local versionSuccess, versionErr = downloadFile("https://raw.githubusercontent.com/devdanykg/mozart-script/main/version.txt", configPath .. "/version.txt")
+        	if not versionSuccess then
+        	    return false, versionErr
+        	end
+    	end)
+    	if not success then
+		hs.alert("Update error!")
+        	return print("Error when uploading files: " .. tostring(err)) 
+    	end
+    	hs.reload()
+    	hs.alert("Update successfully ")
+    end
+end
+
+hs.timer.doAfter(1, function() checkForUpdates() end)
+
+escHotkey = hs.hotkey.new({}, "escape", function()
+    webview:hide()
+    if escHotkey then escHotkey:disable() end
+end)
